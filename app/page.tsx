@@ -8,7 +8,7 @@ export default function Home() {
           Server Component
         </span>
         <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
-          웹서버보안프로그래밍 3주차입니다.
+          웹서버보안프로그래밍 조서원입니다.
         </h1>
         <p className="max-w-md text-base leading-7 text-zinc-500 dark:text-zinc-450">
           create-next-app으로 만든 Next.js 16 App Router 템플릿입니다. 이
@@ -21,6 +21,12 @@ export default function Home() {
           className="text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
         >
           /about 페이지로 이동 (파일 기반 라우팅 확인) →
+        </Link>
+        <Link
+          href="/products"
+          className="text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
+        >
+          /products 페이지로 이동 →
         </Link>
       </main>
     </div>
