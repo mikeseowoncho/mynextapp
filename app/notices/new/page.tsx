@@ -1,5 +1,4 @@
 import { createNoticeAction } from "@/lib/actions";
-import { SubmitButton } from "@/components/SubmitButton";
 
 export default function NewNoticePage() {
   return (
@@ -53,7 +52,12 @@ export default function NewNoticePage() {
             className="resize-none rounded-md border border-black/[.08] px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-white/[.145] dark:bg-transparent"
           />
         </div>
-        <SubmitButton label="등록하기" />
+        <button
+          type="submit"
+          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+        >
+          등록하기
+        </button>
       </form>
     </div>
   );
