@@ -1,5 +1,3 @@
-"use server";
-
 import { createNoticeAction } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 
