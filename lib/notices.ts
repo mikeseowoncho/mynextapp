@@ -11,7 +11,7 @@ const notices: Notice[] = [
     id: "1",
     title: "웹서버보안프로그래밍 개강 안내",
     author: "관리자",
-    content: "강의계획서를 확인후 열심히 공부합시다",
+    content: "강의계획서를 확인후 열심히 공부해봅시다",
     createdAt: "2023-09-01",
   },
   {
