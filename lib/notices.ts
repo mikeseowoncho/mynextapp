@@ -1,3 +1,6 @@
+import { connectDB } from "./mongodb";
+import { Notice as NoticeModel } from "@/models/Notice";
+
 export type Notice = {
   id: string;
   title: string;
@@ -6,44 +9,71 @@ export type Notice = {
   createdAt: string;
 };
 
-const notices: Notice[] = [
-  {
-    id: "1",
-    title: "웹서버보안프로그래밍 개강 안내",
-    author: "관리자",
-    content: "강의계획서를 확인후 열심히 공부해봅시다",
-    createdAt: "2023-09-01",
-  },
-  {
-    id: "2",
-    title: "Github Organization 초대 안내",
-    author: "관리자",
-    content: "Github Organization에 초대되었습니다. 확인해주세요.",
-    createdAt: "2023-09-03",
-  },
-  {
-    id: "3",
-    title: "첫번째 과제 안내",
-    author: "관리자",
-    content: "과제를 github,vercel에 제출하세요.",
-    createdAt: "2023-09-05",
-  },
-];
+// Mongoose 문서를 화면에서 쓰는 평범한 객체(Notice)로 변환합니다.
+// _id(ObjectId)는 문자열로, createdAt(Date)은 YYYY-MM-DD 문자열로 바꿉니다.
+type NoticeDocLike = {
+  _id: unknown;
+  title: string;
+  author: string;
+  content: string;
+  createdAt?: Date;
+};
 
-let nextId = 4;
+function toNotice(doc: NoticeDocLike): Notice {
+  return {
+    id: String(doc._id),
+    title: doc.title,
+    author: doc.author,
+    content: doc.content,
+    createdAt: (doc.createdAt ?? new Date()).toISOString().slice(0, 10),
+  };
+}
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+// 처음 실습할 때 컬렉션이 비어있으면 화면이 휑하니, 문서가 하나도
+// 없을 때만 예시 데이터 3개를 자동으로 넣어줍니다. (실제 서비스라면
+// 이런 시드 로직은 별도 스크립트로 분리하는 것이 더 안전합니다.)
+async function seedIfEmpty() {
+  const count = await NoticeModel.countDocuments();
+  if (count > 0) return;
+
+  await NoticeModel.insertMany([
+    {
+      title: "웹서버보안프로그래밍 개강 안내",
+      author: "관리자",
+      content:
+        "2학기 웹서버보안프로그래밍 수업이 시작됩니다. 강의계획서를 확인해주세요.",
+    },
+    {
+      title: "GitHub Organization 초대 안내",
+      author: "관리자",
+      content:
+        "과제 제출용 GitHub Organization 초대 메일을 확인하고 가입해주세요.",
+    },
+    {
+      title: "6주차 실습 — MongoDB 연동",
+      author: "관리자",
+      content: "이번 주부터 공지사항 게시판이 실제 데이터베이스에 저장됩니다.",
+    },
+  ]);
 }
 
 export async function getNotices(): Promise<Notice[]> {
-  await delay(500);
-  return [...notices].sort((a, b) => (a.id < b.id ? 1 : -1));
-} // 👈 이 닫는 중괄호가 누락되어 있었습니다.
+  await connectDB();
+  await seedIfEmpty();
+  const docs = await NoticeModel.find().sort({ createdAt: -1 }).lean();
+  return docs.map((doc) => toNotice(doc as NoticeDocLike));
+}
 
 export async function getNotice(id: string): Promise<Notice | undefined> {
-  await delay(400);
-  return notices.find((n) => n.id === id);
+  await connectDB();
+  try {
+    const doc = await NoticeModel.findById(id).lean();
+    return doc ? toNotice(doc as NoticeDocLike) : undefined;
+  } catch {
+    // id가 MongoDB ObjectId 형식이 아니면 findById가 에러를 던집니다.
+    // 사용자에게는 스택 트레이스 대신 "찾을 수 없음"으로만 보여줍니다.
+    return undefined;
+  }
 }
 
 export async function createNotice(input: {
@@ -51,14 +81,7 @@ export async function createNotice(input: {
   author: string;
   content: string;
 }): Promise<Notice> {
-  await delay(300);
-  const notice: Notice = {
-    id: String(nextId++),
-    title: input.title,
-    author: input.author,
-    content: input.content,
-    createdAt: new Date().toISOString().slice(0, 10),
-  };
-  notices.push(notice);
-  return notice;
+  await connectDB();
+  const doc = await NoticeModel.create(input);
+  return toNotice(doc);
 }
